@@ -207,6 +207,8 @@
 
               }
             }
+
+            console.log('cellDisabledClass == ', cellDisabledClass);
             cell.inRange = time >= getDateTimestamp(this.minDate) && time <= getDateTimestamp(this.maxDate);
             cell.start = this.minDate && time === getDateTimestamp(this.minDate);
             cell.end = this.maxDate && time === getDateTimestamp(this.maxDate);
