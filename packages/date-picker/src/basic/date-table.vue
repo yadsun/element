@@ -1,25 +1,25 @@
 <template>
   <table
-    cellspacing="0"
-    cellpadding="0"
-    class="el-date-table"
-    @click="handleClick"
-    @mousemove="handleMouseMove"
-    :class="{ 'is-week-mode': selectionMode === 'week' }">
+          cellspacing="0"
+          cellpadding="0"
+          class="el-date-table"
+          @click="handleClick"
+          @mousemove="handleMouseMove"
+          :class="{ 'is-week-mode': selectionMode === 'week' }">
     <tbody>
     <tr>
       <th v-if="showWeekNumber">{{ t('el.datepicker.week') }}</th>
       <th v-for="(week, key) in WEEKS" :key="key">{{ t('el.datepicker.weeks.' + week) }}</th>
     </tr>
     <tr
-      class="el-date-table__row"
-      v-for="(row, key) in rows"
-      :class="{ current: isWeekActive(row[1]) }"
-      :key="key">
+            class="el-date-table__row"
+            v-for="(row, key) in rows"
+            :class="{ current: isWeekActive(row[1]) }"
+            :key="key">
       <td
-        v-for="(cell, key) in row"
-        :class="getCellClasses(cell)"
-        :key="key">
+              v-for="(cell, key) in row"
+              :class="getCellClasses(cell)"
+              :key="key">
         <div>
           <span>
             {{ cell.text }}
@@ -32,9 +32,18 @@
 </template>
 
 <script>
-  import { getFirstDayOfMonth, getDayCountOfMonth, getWeekNumber, getStartDateOfMonth, prevDate, nextDate, isDate, clearTime as _clearTime} from 'element-ui/src/utils/date-util';
+  import {
+    getFirstDayOfMonth,
+    getDayCountOfMonth,
+    getWeekNumber,
+    getStartDateOfMonth,
+    prevDate,
+    nextDate,
+    isDate,
+    clearTime as _clearTime
+  } from 'element-ui/src/utils/date-util';
   import Locale from 'element-ui/src/mixins/locale';
-  import { arrayFindIndex, arrayFind, coerceTruthyValueToArray } from 'element-ui/src/utils/util';
+  import {arrayFindIndex, arrayFind, coerceTruthyValueToArray} from 'element-ui/src/utils/util';
 
   const WEEKS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const getDateTimestamp = function(time) {
@@ -86,6 +95,15 @@
       },
 
       disabledDate: {},
+      disabledDates: {
+        type: Array,
+        default: [
+          {
+            date: '2019/06/20',
+            used: [1, 0]
+          }
+        ]
+      },
 
       minDate: {},
 
@@ -140,6 +158,7 @@
 
         const startDate = this.startDate;
         const disabledDate = this.disabledDate;
+        const disabledDates = this.disabledDates;
         const selectedDate = this.selectionMode === 'dates' ? coerceTruthyValueToArray(this.value) : [];
         const now = getDateTimestamp(new Date());
 
@@ -148,20 +167,46 @@
 
           if (this.showWeekNumber) {
             if (!row[0]) {
-              row[0] = { type: 'week', text: getWeekNumber(nextDate(startDate, i * 7 + 1)) };
+              row[0] = {type: 'week', text: getWeekNumber(nextDate(startDate, i * 7 + 1))};
             }
           }
 
           for (let j = 0; j < 7; j++) {
             let cell = row[this.showWeekNumber ? j + 1 : j];
             if (!cell) {
-              cell = { row: i, column: j, type: 'normal', inRange: false, start: false, end: false };
+              cell = {row: i, column: j, type: 'normal', inRange: false, start: false, end: false};
             }
 
             cell.type = 'normal';
 
             const index = i * 7 + j;
             const time = nextDate(startDate, index - offset).getTime();
+            let cellDisabledClass = ''; // 样式类名morning afternoon wholeday
+            if (disabledDates && disabledDates.length) {
+              for (let i = 0; i < disabledDates.length; i++) {
+                const obj = disabledDates[i];
+                const dateStr = obj.date;
+                const usedArr = obj.used;
+                const date = new Date(dateStr);
+                if (date.getTime() === time) {
+                  if (usedArr.toString() === [1, 1].toString()) {
+                    // 全天
+                    cellDisabledClass = 'wholeday';
+                  } else if (usedArr.toString() === [1, 0].toString()) {
+                    // 上午
+                    cellDisabledClass = 'morning';
+                  } else if (usedArr.toString() === [0, 1].toString()) {
+                    // 下午
+                    cellDisabledClass = 'afternoon';
+                  }
+
+                  cell.disabledClass = cellDisabledClass;
+                  console.log('cellDisabledClass == ', cellDisabledClass);
+                  break;
+                }
+
+              }
+            }
             cell.inRange = time >= getDateTimestamp(this.minDate) && time <= getDateTimestamp(this.maxDate);
             cell.start = this.minDate && time === getDateTimestamp(this.minDate);
             cell.end = this.maxDate && time === getDateTimestamp(this.maxDate);
@@ -232,7 +277,7 @@
 
     data() {
       return {
-        tableRows: [ [], [], [], [], [], [] ],
+        tableRows: [[], [], [], [], [], []],
         lastRow: null,
         lastColumn: null
       };
@@ -288,11 +333,16 @@
           classes.push('selected');
         }
 
+        if (cell.disabledClass) {
+          classes.push(cell.disabledClass);
+        }
+
         return classes.join(' ');
       },
 
       getDateOfCell(row, column) {
         const offsetFromStart = row * 7 + (column - (this.showWeekNumber ? 1 : 0)) - this.offsetDay;
+        console.log('--->date-table.vue line 345 getDateOfCell')
         return nextDate(this.startDate, offsetFromStart);
       },
 
