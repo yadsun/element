@@ -96,13 +96,7 @@
 
       disabledDate: {},
       disabledDates: {
-        type: Array,
-        default: [
-          {
-            date: '2019/06/20',
-            used: [1, 0]
-          }
-        ]
+        type: Array
       },
 
       minDate: {},
@@ -201,14 +195,11 @@
                   }
 
                   cell.disabledClass = cellDisabledClass;
-                  console.log('cellDisabledClass == ', cellDisabledClass);
                   break;
                 }
 
               }
             }
-
-            console.log('cellDisabledClass == ', cellDisabledClass);
             cell.inRange = time >= getDateTimestamp(this.minDate) && time <= getDateTimestamp(this.maxDate);
             cell.start = this.minDate && time === getDateTimestamp(this.minDate);
             cell.end = this.maxDate && time === getDateTimestamp(this.maxDate);
@@ -344,7 +335,7 @@
 
       getDateOfCell(row, column) {
         const offsetFromStart = row * 7 + (column - (this.showWeekNumber ? 1 : 0)) - this.offsetDay;
-        console.log('--->date-table.vue line 345 getDateOfCell')
+        console.log('--->date-table.vue line 345 getDateOfCell');
         return nextDate(this.startDate, offsetFromStart);
       },
 

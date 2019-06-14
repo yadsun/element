@@ -822,6 +822,7 @@ export default {
 
     mountPicker() {
       this.picker = new Vue(this.panel).$mount();
+      // this.picker.defaultValue = this.defaultValue;
       this.picker.defaultValue = this.defaultValue;
       this.picker.defaultTime = this.defaultTime;
       this.picker.popperClass = this.popperClass;
@@ -838,6 +839,7 @@ export default {
       const updateOptions = () => {
         const options = this.pickerOptions;
 
+        this.picker.disabledDates = options.disabledDates;
         if (options && options.selectableRange) {
           let ranges = options.selectableRange;
           const parser = TYPE_VALUE_RESOLVER_MAP.datetimerange.parser;

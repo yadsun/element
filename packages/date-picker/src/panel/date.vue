@@ -173,7 +173,11 @@
 
   export default {
     mixins: [Locale],
-
+    props: {
+      disabledDates: {
+        type: Array
+      }
+    },
     directives: { Clickoutside },
 
     watch: {
@@ -516,7 +520,6 @@
         visible: false,
         currentView: 'date',
         disabledDate: '',
-        disabledDates: [],
         selectableRange: [],
         firstDayOfWeek: 7,
         showWeekNumber: false,
